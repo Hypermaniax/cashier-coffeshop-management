@@ -13,10 +13,10 @@ import {
   InputGroupText,
 } from "@/components/ui/input-group";
 import { Spinner } from "@/components/ui/spinner";
-import { login } from "@/service/auth/login";
 import { Loader2, Lock, LogIn, User } from "lucide-react";
 import { useActionState, useEffect } from "react";
 import { toast } from "sonner";
+import { login } from "./action";
 
 export default function AdminPage() {
   const [state, formAction, isPending] = useActionState(login, null);
