@@ -19,7 +19,6 @@ export const login = async (_: any, formData: FormData) => {
     };
 
   const existedUser = await existUser(validate.data.username);
-  console.log(existedUser);
   if (!existedUser)
     return {
       success: false,
