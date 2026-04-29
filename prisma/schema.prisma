@@ -1,0 +1,83 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Get a free hosted Postgres database in seconds: `npx create-db`
+
+generator client {
+  provider = "prisma-client"
+  output   = "../lib/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model Users {
+  id         String   @id @default(uuid())
+  name       String
+  username   String   @unique
+  password   String
+  role       Role     @relation(fields: [roleId], references: [id])
+  roleId     Int
+  createdAt  DateTime @default(now())
+  isActive   Boolean  @default(true)
+  updatedAt  DateTime @updatedAt
+  orders     Order[]
+}
+
+model Role {
+  id    Int     @id @default(autoincrement())
+  name  String  @unique
+  users Users[]
+}
+
+// --- MANAJEMEN PRODUK ---
+
+model Category {
+  id       Int       @id @default(autoincrement())
+  name     String    @unique
+  products Product[]
+}
+
+model Product {
+  id    String  @id @default(uuid())
+  name  String
+  price Float
+  stock Int     @default(0)
+  image String?
+
+  category   Category @relation(fields: [categoryId], references: [id])
+  categoryId Int
+
+  orderItems OrderItem[]
+
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Order {
+  id            String @id @default(uuid())
+  totalAmount   Float
+  paymentMethod String
+  status        String @default("COMPLETED")
+
+  cashier   Users  @relation(fields: [cashierId], references: [id])
+  cashierId String
+
+  items OrderItem[]
+
+  createdAt DateTime @default(now())
+}
+
+model OrderItem {
+  id       String @id @default(uuid())
+  quantity Int
+  subtotal Float
+
+  order   Order  @relation(fields: [orderId], references: [id])
+  orderId String
+
+  product   Product @relation(fields: [productId], references: [id])
+  productId String
+}
