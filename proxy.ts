@@ -6,8 +6,9 @@ export const proxy = async (req: NextRequest) => {
   // check login
   const auth = await isAuthenticated(req);
   if (auth instanceof NextResponse) return auth;
-
-  const checkRoleAndRedirect = redirectAndCheckRole(auth.role);
+  //check role and redirect
+  const checkRoleAndRedirect = await redirectAndCheckRole(req, auth.role);
+  if (checkRoleAndRedirect instanceof NextResponse) return checkRoleAndRedirect;
 
   return NextResponse.next();
 };

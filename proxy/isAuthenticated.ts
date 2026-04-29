@@ -7,7 +7,7 @@ export const isAuthenticated = async (req: NextRequest) => {
 
   if (path === "/login") {
     if (token) {
-      return NextResponse.redirect(new URL("/dashboard", req.url));
+      return NextResponse.redirect(new URL("/cashier", req.url));
     }
     return NextResponse.next();
   }
@@ -15,7 +15,7 @@ export const isAuthenticated = async (req: NextRequest) => {
 
   try {
     const verifyToken = validateToken(token);
-    return verifyToken ;
+    return verifyToken;
   } catch (error) {
     return NextResponse.redirect(new URL("/login", req.url));
   }
