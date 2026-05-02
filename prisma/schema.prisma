@@ -13,16 +13,17 @@ datasource db {
 }
 
 model Users {
-  id         String   @id @default(uuid())
-  name       String
-  username   String   @unique
-  password   String
-  role       Role     @relation(fields: [roleId], references: [id])
-  roleId     Int
-  createdAt  DateTime @default(now())
-  isActive   Boolean  @default(true)
-  updatedAt  DateTime @updatedAt
-  orders     Order[]
+  id        String    @id @default(uuid())
+  name      String
+  username  String    @unique
+  password  String
+  role      Role      @relation(fields: [roleId], references: [id])
+  roleId    Int
+  createdAt DateTime  @default(now())
+  isActive  Boolean   @default(true)
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+  orders    Order[]
 }
 
 model Role {
@@ -51,9 +52,10 @@ model Product {
 
   orderItems OrderItem[]
 
-  isActive  Boolean  @default(true)
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  isActive  Boolean   @default(true)
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
 }
 
 model Order {

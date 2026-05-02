@@ -1,60 +1,107 @@
 "use server";
 
-import prisma from "@/lib/client";
+import { categoryService } from "@/service/category";
+import { productService } from "@/service/product";
+import { createCategorySchema } from "@/utils/validation/categories";
+import {
+  createProductSchema,
+  updateProductSchema,
+} from "@/utils/validation/product";
 import { revalidatePath } from "next/cache";
 
 export async function createProduct(formData: FormData) {
-  const name = formData.get("name") as string;
-  const price = parseFloat(formData.get("price") as string);
-  const stock = parseInt(formData.get("stock") as string);
-  const categoryId = parseInt(formData.get("categoryId") as string);
-  const image = (formData.get("image") as string) || null;
+  const data = Object.fromEntries(formData.entries());
 
-  if (!name || isNaN(price) || isNaN(stock) || isNaN(categoryId)) {
-    throw new Error("Invalid form data");
+  const validate = createProductSchema.safeParse(data);
+  if (!validate.success)
+    return {
+      success: false,
+      message: validate.error.issues[0].message,
+      inputs: validate.data,
+    };
+  try {
+    const { create, category } = await productService.createProduct(
+      validate.data,
+    );
+    revalidatePath("/admin/product");
+    return {
+      success: true,
+      message: `Product ${create.name} (${category.name}) created successfully`,
+    };
+  } catch (error: any) {
+    return {
+      success: false,
+      message: error.message,
+      inputs: validate.data,
+    };
   }
-
-  await prisma.product.create({
-    data: { name, price, stock, categoryId, image },
-  });
-
-  revalidatePath("/admin/product");
 }
 
 export async function updateProduct(id: string, formData: FormData) {
-  const name = formData.get("name") as string;
-  const price = parseFloat(formData.get("price") as string);
-  const stock = parseInt(formData.get("stock") as string);
-  const categoryId = parseInt(formData.get("categoryId") as string);
-  const image = (formData.get("image") as string) || null;
-
-  if (!name || isNaN(price) || isNaN(stock) || isNaN(categoryId)) {
-    throw new Error("Invalid form data");
+  const data = Object.fromEntries(formData.entries());
+  const validate = updateProductSchema.safeParse(data);
+  if (!validate.success) {
+    return {
+      success: false,
+      message: validate.error.issues[0].message,
+      inputs: validate.data,
+    };
   }
+  try {
+    const { update } = await productService.updateProduct(id, validate.data);
+    revalidatePath("/admin/product");
 
-  await prisma.product.update({
-    where: { id },
-    data: { name, price, stock, categoryId, image },
-  });
-
-  revalidatePath("/admin/product");
+    return {
+      success: true,
+      message: `Product ${update.name} updated successfully`,
+    };
+  } catch (error: any) {
+    return {
+      success: false,
+      message: error.message,
+      inputs: validate.data,
+    };
+  }
 }
 
 export async function deleteProduct(id: string) {
-  await prisma.product.delete({ where: { id } });
-  revalidatePath("/admin/product");
+  try {
+    const { update } = await productService.softDeleteProduct(id);
+    revalidatePath("/admin/product");
+    return {
+      success: true,
+      message: `Product ${update.name} deleted successfully`,
+    };
+  } catch (error: any) {
+    return {
+      success: false,
+      message: error.message,
+    };
+  }
 }
 
 export async function createCategory(name: string) {
-  const trimmed = name.trim();
-  if (!trimmed) throw new Error("Category name is required");
+  const validate = createCategorySchema.safeParse({ name });
+  if (!validate.success)
+    return {
+      success: false,
+      message: validate.error.issues[0].message,
+      inputs: validate.data,
+    };
 
-  const existing = await prisma.category.findFirst({
-    where: { name: { equals: trimmed, mode: "insensitive" } },
-  });
-  if (existing) return existing;
-
-  const category = await prisma.category.create({ data: { name: trimmed } });
-  revalidatePath("/admin/product");
-  return category;
+  try {
+    const create = await categoryService.createCategory(validate.data.name.toLowerCase());
+    revalidatePath("admin/product");
+    return {
+      success: true,
+      message: `Category ${create.name} created successfully`,
+      data: create,
+    };
+  } catch (error: any) {
+    return {
+      success: false,
+      message: error.message,
+      inputs: validate.data,
+    };
+  }
 }

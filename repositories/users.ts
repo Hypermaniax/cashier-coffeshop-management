@@ -1,25 +1,75 @@
 import prisma from "@/lib/client";
-import { CreateUserDto } from "./users.d";
+import { CreateUserDto } from "@/types";
 
-export const createUser = async (data: CreateUserDto) => {
-  return await prisma.users.create({
+export const userRepositories = {
+  async getUserByRole(role: string) {
+    return await prisma.users.findMany({
+      where: {
+        role: {
+          name: role,
+        },
+        deletedAt: null,
+      },
+      select: {
+        id: true,
+        name: true,
+        username: true,
+        isActive: true,
+        createdAt: true,
+        role: true,
+      },
+    });
+  },
+  async existUser(username: string) {
+    return await prisma.users.findUnique({
+      where: {
+        username,
+      },
+      include: {
+        role: true,
+      },
+    });
+  },
+  async createUser(data: CreateUserDto) {
+    return await prisma.users.create({
+      data: {
+        name: data.name,
+        username: data.username,
+        password: data.password,
+        roleId: data.roleId,
+        isActive: data.isActive,
+      },
+    });
+  },
+  async updateUser(
+    id: string,
     data: {
-      name: data.name,
-      username: data.username,
-      password: data.password,
-      roleId: data.roleId,
-      isActive: data.isActive,
+      name: string;
+      username: string;
+      password?: string;
+      roleId: number;
+      isActive: boolean;
     },
-  });
-};
-
-export const existUser = async (username: string) => {
-  return await prisma.users.findUnique({
-    where: {
-      username,
-    },
-    include: {
-      role: true,
-    },
-  });
+  ) {
+    return await prisma.users.update({
+      where: { id },
+      data,
+    });
+  },
+  async softDeleteUser(id: string) {
+    return await prisma.users.update({
+      where: { id },
+      data: {
+        deletedAt: new Date(),
+      },
+    });
+  },
+  async getUserById(id: string) {
+    return await prisma.users.findUnique({
+      where: { id },
+      include: {
+        role: true,
+      },
+    });
+  },
 };

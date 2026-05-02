@@ -17,14 +17,17 @@ import { Loader2, Lock, LogIn, User } from "lucide-react";
 import { useActionState, useEffect } from "react";
 import { toast } from "sonner";
 import { login } from "./action";
+import { redirect } from "next/navigation";
 
 export default function AdminPage() {
   const [state, formAction, isPending] = useActionState(login, null);
 
   useEffect(() => {
     if (!state) return;
-    if (state?.success) toast.success(state.message);
-    else toast.error(state.message);
+    if (state?.success) {
+      toast.success(state.message);
+      redirect("/cashier");
+    } else toast.error(state.message);
   }, [state]);
 
   return (

@@ -1,10 +1,11 @@
-import { existUser } from "@/repositories/users";
-import { comparePassword } from "@/utils/bcrypt";
+import { userRepositories } from "@/repositories/users";
+import { CreateEmployeeDto, UpdateEmployeeDto } from "@/types";
+import { comparePassword, hashPassword } from "@/utils/bcrypt";
 import { generateToken } from "@/utils/jwt";
 
 export const authService = {
   async authenticate(username: string, password: string) {
-    const user = await existUser(username);
+    const user = await userRepositories.existUser(username);
     if (!user) throw new Error("User not found");
     if (!user.isActive) throw new Error("User not active");
 
@@ -19,5 +20,39 @@ export const authService = {
     const token = await generateToken(safetyPayload);
 
     return { user, token };
+  },
+  async createUser(data: CreateEmployeeDto) {
+    const existed = await userRepositories.existUser(data.username);
+    if (existed) throw new Error("User already exists");
+    const password = await hashPassword(data.password);
+    const payload = {
+      ...data,
+      password,
+    };
+    const create = await userRepositories.createUser(payload);
+
+    return { create };
+  },
+  async updateUser(id: string, data: UpdateEmployeeDto) {
+    if (!id) throw new Error("User not found");
+    const existed = await userRepositories.existUser(data.username);
+    if (existed && existed.id !== id) throw new Error("User already exists");
+
+    const password = data.password
+      ? await hashPassword(data.password)
+      : existed?.password;
+
+    const payload = {
+      ...data,
+      password,
+    };
+    const update = await userRepositories.updateUser(id, payload);
+    return { update };
+  },
+  async sofDeleteUser(id: string) {
+    const existed = await userRepositories.getUserById(id);
+    if (!existed) throw new Error("User not found");
+    const update = await userRepositories.softDeleteUser(id);
+    return { update };
   },
 };

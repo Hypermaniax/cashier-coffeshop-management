@@ -20,24 +20,10 @@ import {
 } from "@/components/ui/select";
 import { Plus, ChevronLeft } from "lucide-react";
 import { createProduct, updateProduct, createCategory } from "./actions";
+import { toast } from "sonner";
+import { Category, ProductFormDialogProps } from "@/types";
 
-type Category = { id: number; name: string };
 
-type Product = {
-  id: string;
-  name: string;
-  price: number;
-  stock: number;
-  image: string | null;
-  categoryId: number;
-};
-
-interface ProductFormDialogProps {
-  open: boolean;
-  onClose: () => void;
-  categories: Category[];
-  product?: Product;
-}
 
 export function ProductFormDialog({
   open,
@@ -49,7 +35,7 @@ export function ProductFormDialog({
   const formRef = useRef<HTMLFormElement>(null);
 
   const [categoryId, setCategoryId] = useState(
-    product?.categoryId?.toString() ?? ""
+    product?.categoryId?.toString() ?? "",
   );
   const [categoryMode, setCategoryMode] = useState<"select" | "new">("select");
   const [newCategoryName, setNewCategoryName] = useState("");
@@ -58,7 +44,8 @@ export function ProductFormDialog({
   const [isPending, startTransition] = useTransition();
   const [error, setError] = useState<string | null>(null);
 
-  const [localCategories, setLocalCategories] = useState<Category[]>(categories);
+  const [localCategories, setLocalCategories] =
+    useState<Category[]>(categories);
 
   function handleClose() {
     setError(null);
@@ -72,15 +59,20 @@ export function ProductFormDialog({
     if (!newCategoryName.trim()) return;
     startCreatingCategory(async () => {
       try {
-        const cat = await createCategory(newCategoryName);
-        setLocalCategories((prev) =>
-          prev.find((c) => c.id === cat.id) ? prev : [...prev, cat]
-        );
-        setCategoryId(cat.id.toString());
-        setCategoryMode("select");
-        setNewCategoryName("");
-      } catch {
-        setError("Failed to create category.");
+        const { message, success, data } =
+          await createCategory(newCategoryName);
+
+        if (success) {
+          toast.success(message);
+          setLocalCategories((prev) =>
+            prev.find((c) => c.id === data?.id) ? prev : [...prev, data!],
+          );
+          setCategoryId(data?.id.toString() ?? "");
+          setCategoryMode("select");
+          setNewCategoryName("");
+        } else toast.error(message);
+      } catch (error: any) {
+        toast.error(error);
       }
     });
   }
@@ -94,16 +86,23 @@ export function ProductFormDialog({
     startTransition(async () => {
       try {
         if (isEdit) {
-          await updateProduct(product.id, formData);
+          const { success, message } = await updateProduct(
+            product.id,
+            formData,
+          );
+          if (success) toast.success(message);
+          else toast.error(message);
         } else {
-          await createProduct(formData);
+          const { success, message } = await createProduct(formData);
+          if (success) toast.success(message);
+          else toast.error(message);
         }
         formRef.current?.reset();
         setCategoryId("");
         setCategoryMode("select");
         handleClose();
-      } catch {
-        setError("Something went wrong. Please try again.");
+      } catch (error: any) {
+        toast.error(error.message);
       }
     });
   }
@@ -236,6 +235,20 @@ export function ProductFormDialog({
             />
           </div>
 
+          {/* Active Status */}
+          <div className="flex items-center space-x-2 pt-2">
+            <input
+              type="checkbox"
+              id="isActive"
+              name="isActive"
+              defaultChecked={isEdit ? product.isActive : true}
+              className="h-4 w-4 rounded border-gray-300 text-primary focus:ring-primary"
+            />
+            <Label htmlFor="isActive" className="cursor-pointer">
+              Active
+            </Label>
+          </div>
+
           {error && <p className="text-sm text-destructive">{error}</p>}
 
           <DialogFooter>
@@ -246,8 +259,8 @@ export function ProductFormDialog({
               {isPending
                 ? "Saving..."
                 : isEdit
-                ? "Save Changes"
-                : "Add Product"}
+                  ? "Save Changes"
+                  : "Add Product"}
             </Button>
           </DialogFooter>
         </form>

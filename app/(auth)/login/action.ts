@@ -2,6 +2,7 @@
 
 import { authService } from "@/service/auth";
 import { authScema } from "@/utils/validation/auth";
+import { revalidatePath } from "next/cache";
 import { cookies } from "next/headers";
 
 export const login = async (_: any, formData: FormData) => {
@@ -27,14 +28,14 @@ export const login = async (_: any, formData: FormData) => {
       sameSite: "strict",
       maxAge: 60 * 60 * 24,
     });
+    revalidatePath("/login");
     return { success: true, message: `Welcome Back ${user.name}` };
   } catch (error: any) {
     return { success: false, message: error.message, inputs: validate.data };
   }
 };
 
-
-export const logout = async () => {
+export const logOut = async () => {
   const cookie = await cookies();
   cookie.delete("token");
   return { success: true, message: "Logout successfully" };

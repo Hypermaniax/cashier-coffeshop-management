@@ -1,6 +1,3 @@
-"use client";
-
-import { useTransition } from "react";
 import {
   Dialog,
   DialogContent,
@@ -9,39 +6,38 @@ import {
   DialogFooter,
   DialogDescription,
 } from "@/components/ui/dialog";
+import { useTransition } from "react";
 import { Button } from "@/components/ui/button";
-import { deleteProduct } from "./actions";
+import { deleteEmployee } from "./action";
 
-interface DeleteProductDialogProps {
+interface DeleteEmployeeDialogProps {
   open: boolean;
   onClose: () => void;
-  product: { id: string; name: string } | null;
+  employee: { id: string; name: string } | null;
 }
 
-export function DeleteProductDialog({
+export function DeleteEmployeeDialog({
   open,
   onClose,
-  product,
-}: DeleteProductDialogProps) {
+  employee,
+}: DeleteEmployeeDialogProps) {
   const [isPending, startTransition] = useTransition();
-
   function handleDelete() {
-    if (!product) return;
+    if (!employee) return;
     startTransition(async () => {
-      await deleteProduct(product.id);
+      await deleteEmployee(employee.id);
       onClose();
     });
   }
-
   return (
     <Dialog open={open} onOpenChange={(v) => !v && onClose()}>
       <DialogContent className="sm:max-w-sm">
         <DialogHeader>
-          <DialogTitle>Delete Product</DialogTitle>
+          <DialogTitle>Delete Employee</DialogTitle>
           <DialogDescription>
             Are you sure you want to delete{" "}
             <span className="font-semibold text-foreground">
-              {product?.name}
+              {employee?.name}
             </span>
             ? This action cannot be undone.
           </DialogDescription>
@@ -57,7 +53,7 @@ export function DeleteProductDialog({
           >
             {isPending ? "Deleting..." : "Delete"}
           </Button>
-        </DialogFooter> 
+        </DialogFooter>
       </DialogContent>
     </Dialog>
   );

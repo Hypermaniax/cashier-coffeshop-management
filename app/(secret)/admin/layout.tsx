@@ -22,9 +22,13 @@ import {
   Receipt,
   Users,
   User2,
+  LogOut,
 } from "lucide-react";
 import Link from "next/link";
 import { TooltipProvider } from "@/components/ui/tooltip";
+import { logOut } from "@/app/(auth)/login/action";
+import { toast } from "sonner";
+import { redirect } from "next/navigation";
 
 const navItems = [
   { title: "Dashboard", icon: LayoutDashboard, href: "/admin" },
@@ -38,82 +42,89 @@ export default function AdminLayout({
 }: {
   children: React.ReactNode;
 }) {
+  const handleLogout = async () => {
+    const res = await logOut();
+    if (res.success) {
+      toast.success(res.message);
+      redirect("/login");
+    }
+  };
   return (
     <TooltipProvider>
-    <SidebarProvider>
-      <Sidebar collapsible="icon">
-        <SidebarHeader>
-          <SidebarMenu>
-            <SidebarMenuItem>
-              <SidebarMenuButton size="lg" asChild>
-                <Link href="/admin">
-                  <Coffee />
-                  <span className="font-semibold">Coffee Shop</span>
-                </Link>
-              </SidebarMenuButton>
-            </SidebarMenuItem>
-          </SidebarMenu>
-        </SidebarHeader>
+      <SidebarProvider>
+        <Sidebar collapsible="icon">
+          <SidebarHeader>
+            <SidebarMenu>
+              <SidebarMenuItem>
+                <SidebarMenuButton size="lg" asChild>
+                  <Link href="/admin">
+                    <Coffee />
+                    <span className="font-semibold">Coffee Shop</span>
+                  </Link>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
+            </SidebarMenu>
+          </SidebarHeader>
 
-        <SidebarContent>
-          <SidebarGroup>
-            <SidebarGroupLabel>Menu</SidebarGroupLabel>
-            <SidebarGroupContent>
-              <SidebarMenu>
-                {navItems.map((item) => (
-                  <SidebarMenuItem key={item.title}>
-                    <SidebarMenuButton asChild tooltip={item.title}>
-                      <Link href={item.href}>
-                        <item.icon className="text-2xl"/>
-                        <span className="text-base">{item.title}</span>
-                      </Link>
-                    </SidebarMenuButton>
-                  </SidebarMenuItem>
-                ))}
-              </SidebarMenu>
-            </SidebarGroupContent>
-          </SidebarGroup>
-        </SidebarContent>
+          <SidebarContent>
+            <SidebarGroup>
+              <SidebarGroupLabel>Menu</SidebarGroupLabel>
+              <SidebarGroupContent>
+                <SidebarMenu>
+                  {navItems.map((item) => (
+                    <SidebarMenuItem key={item.title}>
+                      <SidebarMenuButton asChild tooltip={item.title}>
+                        <Link href={item.href}>
+                          <item.icon className="text-2xl" />
+                          <span className="text-base">{item.title}</span>
+                        </Link>
+                      </SidebarMenuButton>
+                    </SidebarMenuItem>
+                  ))}
+                </SidebarMenu>
+              </SidebarGroupContent>
+            </SidebarGroup>
+          </SidebarContent>
 
-        <SidebarFooter>
-          <SidebarMenu>
-            <SidebarMenuItem>
-              <SidebarMenuButton>
-                <User2 /> Username
-              </SidebarMenuButton>
-            </SidebarMenuItem>
-          </SidebarMenu>
-        </SidebarFooter>
-      </Sidebar>
+          <SidebarFooter>
+            <SidebarMenu>
+              <SidebarMenuItem>
+                <SidebarMenuButton onClick={handleLogout}>
+                  <LogOut /> Log out
+                </SidebarMenuButton>
+              </SidebarMenuItem>
+            </SidebarMenu>
+          </SidebarFooter>
+        </Sidebar>
 
-      <SidebarInset>
-        <header className="flex h-14 items-center gap-2 border-b px-4">
-          <SidebarTrigger />
-        </header>
-        <div className="relative flex-1 p-4 ">
-          <div
-            style={{
-              position: "absolute",
-              inset: 0,
-              opacity: 0.1,
-              backgroundImage: `radial-gradient(circle at 20% 50%, #d4a847 0%, transparent 50%), radial-gradient(circle at 80% 20%, #c8803a 0%, transparent 40%)`,
-              pointerEvents: "none",
-            }}
-          />
-          <div
-            style={{
-              position: "absolute",
-              inset: 0,
-              opacity: 0.1,
-              backgroundImage: `linear-gradient(#e8c97a 1px, transparent 1px), linear-gradient(90deg, #e8c97a 1px, transparent 1px)`,
-              backgroundSize: "48px 48px",
-              pointerEvents: "none",
-            }}
-          />
-          {children}
-        </div>
-      </SidebarInset>
-    </SidebarProvider>
+        <SidebarInset>
+          <header className="flex h-14 items-center gap-2 border-b px-4">
+            <SidebarTrigger />
+          </header>
+          <div className="relative flex-1 p-4 ">
+            <div
+              style={{
+                position: "absolute",
+                inset: 0,
+                opacity: 0.1,
+                backgroundImage: `radial-gradient(circle at 20% 50%, #d4a847 0%, transparent 50%), radial-gradient(circle at 80% 20%, #c8803a 0%, transparent 40%)`,
+                pointerEvents: "none",
+              }}
+            />
+            <div
+              style={{
+                position: "absolute",
+                inset: 0,
+                opacity: 0.1,
+                backgroundImage: `linear-gradient(#e8c97a 1px, transparent 1px), linear-gradient(90deg, #e8c97a 1px, transparent 1px)`,
+                backgroundSize: "48px 48px",
+                pointerEvents: "none",
+              }}
+            />
+            {children}
+          </div>
+        </SidebarInset>
+      </SidebarProvider>
     </TooltipProvider>
   );
 }
