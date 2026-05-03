@@ -1,3 +1,6 @@
+"use client";
+
+import { useTransition } from "react";
 import {
   Dialog,
   DialogContent,
@@ -6,9 +9,10 @@ import {
   DialogFooter,
   DialogDescription,
 } from "@/components/ui/dialog";
-import { useTransition } from "react";
 import { Button } from "@/components/ui/button";
+import { Loader2 } from "lucide-react";
 import { deleteEmployee } from "./action";
+import { toast } from "sonner";
 
 interface DeleteEmployeeDialogProps {
   open: boolean;
@@ -22,36 +26,44 @@ export function DeleteEmployeeDialog({
   employee,
 }: DeleteEmployeeDialogProps) {
   const [isPending, startTransition] = useTransition();
+
   function handleDelete() {
     if (!employee) return;
     startTransition(async () => {
-      await deleteEmployee(employee.id);
+      const result = await deleteEmployee(employee.id);
+      if (result?.success) {
+        toast.success(result.message ?? "Karyawan berhasil dihapus");
+      } else {
+        toast.error(result?.message ?? "Gagal menghapus karyawan");
+      }
       onClose();
     });
   }
+
   return (
-    <Dialog open={open} onOpenChange={(v) => !v && onClose()}>
+    <Dialog open={open} onOpenChange={(v) => !v && !isPending && onClose()}>
       <DialogContent className="sm:max-w-sm">
         <DialogHeader>
-          <DialogTitle>Delete Employee</DialogTitle>
+          <DialogTitle>Hapus Karyawan</DialogTitle>
           <DialogDescription>
-            Are you sure you want to delete{" "}
+            Apakah Anda yakin ingin menghapus karyawan{" "}
             <span className="font-semibold text-foreground">
               {employee?.name}
             </span>
-            ? This action cannot be undone.
+            ? Tindakan ini tidak dapat dibatalkan.
           </DialogDescription>
         </DialogHeader>
-        <DialogFooter>
+        <DialogFooter className="gap-2 mt-2">
           <Button variant="outline" onClick={onClose} disabled={isPending}>
-            Cancel
+            Batal
           </Button>
           <Button
             variant="destructive"
             onClick={handleDelete}
             disabled={isPending}
+            className="min-w-[90px]"
           >
-            {isPending ? "Deleting..." : "Delete"}
+            {isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : "Hapus"}
           </Button>
         </DialogFooter>
       </DialogContent>

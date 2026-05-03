@@ -50,6 +50,7 @@ export interface ProductFormDialogProps {
   open: boolean;
   onClose: () => void;
   categories: Category[];
+  modifierGroups: ModifierGroup[];
   product?: Product;
 }
 
@@ -68,6 +69,7 @@ type Product = {
   image: string | null;
   categoryId: number;
   isActive: boolean;
+  modifierGroups?: { id: string; name: string }[];
 };
 
 export type Category = { id: number; name: string };
@@ -90,3 +92,39 @@ type Role = {
   id: number;
   name: string;
 };
+
+export interface CreateModifierOptionDto {
+  id?: string;
+  name: string;
+  additionalPrice: number;
+}
+
+export interface CreateModifierGroupDto {
+  name: string;
+  isRequired: boolean;
+  isMultiple: boolean;
+  options: CreateModifierOptionDto[];
+}
+
+export interface UpdateModifierGroupDto extends CreateModifierGroupDto {}
+
+export type ModifierOption = {
+  id: string;
+  name: string;
+  additionalPrice: number;
+  modifierGroupId: string;
+};
+
+export type ModifierGroup = {
+  id: string;
+  name: string;
+  isRequired: boolean;
+  isMultiple: boolean;
+  options: ModifierOption[];
+};
+
+export interface ModifierFormDialogProps {
+  open: boolean;
+  onClose: () => void;
+  modifierGroup?: ModifierGroup;
+}

@@ -2,12 +2,24 @@
 
 import { categoryService } from "@/service/category";
 import { productService } from "@/service/product";
+import { productRepository } from "@/repositories/product";
 import { createCategorySchema } from "@/utils/validation/categories";
 import {
   createProductSchema,
   updateProductSchema,
 } from "@/utils/validation/product";
 import { revalidatePath } from "next/cache";
+
+function parseModifierIds(formData: FormData): string[] {
+  try {
+    const raw = formData.get("modifierGroupIds");
+    if (!raw) return [];
+    const parsed = JSON.parse(raw as string);
+    return Array.isArray(parsed) ? parsed : [];
+  } catch {
+    return [];
+  }
+}
 
 export async function createProduct(formData: FormData) {
   const data = Object.fromEntries(formData.entries());
@@ -23,10 +35,14 @@ export async function createProduct(formData: FormData) {
     const { create, category } = await productService.createProduct(
       validate.data,
     );
+    const modifierGroupIds = parseModifierIds(formData);
+    if (modifierGroupIds.length > 0) {
+      await productRepository.setProductModifiers(create.id, modifierGroupIds);
+    }
     revalidatePath("/admin/product");
     return {
       success: true,
-      message: `Product ${create.name} (${category.name}) created successfully`,
+      message: `Produk ${create.name} (${category.name}) berhasil ditambahkan`,
     };
   } catch (error: any) {
     return {
@@ -49,11 +65,14 @@ export async function updateProduct(id: string, formData: FormData) {
   }
   try {
     const { update } = await productService.updateProduct(id, validate.data);
+    // Always sync modifiers (even empty = remove all)
+    const modifierGroupIds = parseModifierIds(formData);
+    await productRepository.setProductModifiers(id, modifierGroupIds);
     revalidatePath("/admin/product");
 
     return {
       success: true,
-      message: `Product ${update.name} updated successfully`,
+      message: `Produk ${update.name} berhasil diperbarui`,
     };
   } catch (error: any) {
     return {

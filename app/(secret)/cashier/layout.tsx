@@ -1,7 +1,5 @@
 "use client";
 
-"use client";
-
 import React, { useEffect, useState } from "react";
 import {
   Sidebar,
@@ -20,12 +18,10 @@ import {
 import {
   Coffee,
   LayoutDashboard,
+  ShoppingCart,
+  ClipboardList,
   LogOut,
   Clock,
-  Package,
-  Receipt,
-  Users,
-  SlidersHorizontal,
 } from "lucide-react";
 import Link from "next/link";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -36,11 +32,9 @@ import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
 
 const navItems = [
-  { title: "Dashboard", icon: LayoutDashboard, href: "/admin/dashboard" },
-  { title: "Product", icon: Package, href: "/admin/product" },
-  { title: "Modifier", icon: SlidersHorizontal, href: "/admin/modifiers" },
-  { title: "Transaction", icon: Receipt, href: "/admin/transaction" },
-  { title: "Employee", icon: Users, href: "/admin/employee" },
+  { title: "Dashboard", icon: LayoutDashboard, href: "/cashier/dashboard" },
+  { title: "Kasir (POS)", icon: ShoppingCart, href: "/cashier" },
+  { title: "Riwayat Order", icon: ClipboardList, href: "/cashier/history" },
 ];
 
 function LiveClock() {
@@ -62,7 +56,7 @@ function LiveClock() {
   );
 }
 
-export default function AdminLayout({
+export default function CashierLayout({
   children,
 }: {
   children: React.ReactNode;
@@ -85,14 +79,14 @@ export default function AdminLayout({
             <SidebarMenu>
               <SidebarMenuItem>
                 <SidebarMenuButton size="lg" asChild>
-                  <Link href="/admin/dashboard">
+                  <Link href="/cashier/dashboard">
                     <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-amber-500 shrink-0">
                       <Coffee className="h-4 w-4 text-white" />
                     </div>
                     <div className="flex flex-col gap-0.5 leading-none">
                       <span className="font-bold text-sm">Coffee Shop</span>
                       <span className="text-xs text-muted-foreground">
-                        Admin Panel
+                        Kasir Panel
                       </span>
                     </div>
                   </Link>
@@ -107,8 +101,8 @@ export default function AdminLayout({
                 <SidebarMenu>
                   {navItems.map((item) => {
                     const isActive =
-                      item.href === "/admin"
-                        ? pathname === "/admin"
+                      item.href === "/cashier"
+                        ? pathname === "/cashier"
                         : pathname.startsWith(item.href);
                     return (
                       <SidebarMenuItem key={item.title}>
@@ -117,14 +111,14 @@ export default function AdminLayout({
                           tooltip={item.title}
                           className={cn(
                             isActive &&
-                              "bg-amber-50 text-amber-700 font-semibold",
+                              "bg-amber-50 text-amber-700 font-semibold"
                           )}
                         >
                           <Link href={item.href}>
                             <item.icon
                               className={cn(
                                 "h-4 w-4",
-                                isActive ? "text-amber-600" : "",
+                                isActive ? "text-amber-600" : ""
                               )}
                             />
                             <span>{item.title}</span>
@@ -160,7 +154,7 @@ export default function AdminLayout({
               <SidebarTrigger />
               <div className="h-4 w-px bg-border" />
               <span className="hidden sm:block text-sm font-medium text-muted-foreground">
-                Selamat datang, Admin 👋
+                Selamat datang, Kasir 👋
               </span>
             </div>
             <div className="flex items-center gap-1.5 rounded-full bg-amber-50 px-3 py-1 text-xs font-medium text-amber-700 border border-amber-200">
@@ -189,7 +183,7 @@ export default function AdminLayout({
                 backgroundSize: "48px 48px",
               }}
             />
-            <div className="relative z-10 p-4 md:p-6">{children}</div>
+            <div className="relative z-10 ">{children}</div>
           </div>
         </SidebarInset>
       </SidebarProvider>

@@ -56,6 +56,7 @@ export const productRepository = {
       },
       include: {
         category: true,
+        modifierGroups: true,
       },
       orderBy: { createdAt: "desc" },
     });
@@ -67,6 +68,17 @@ export const productRepository = {
       },
       include: {
         category: true,
+        modifierGroups: true,
+      },
+    });
+  },
+  async setProductModifiers(productId: string, modifierGroupIds: string[]) {
+    return await prisma.product.update({
+      where: { id: productId },
+      data: {
+        modifierGroups: {
+          set: modifierGroupIds.map((id) => ({ id })),
+        },
       },
     });
   },

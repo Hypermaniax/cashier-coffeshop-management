@@ -1,21 +1,12 @@
-'use client'
-import { logOut } from "@/app/(auth)/login/action";
-import { Button } from "@/components/ui/button";
-import { redirect } from "next/navigation";
-import { toast } from "sonner";
+import { productRepository } from "@/repositories/product";
+import { categoryRepository } from "@/repositories/category";
+import { PosContent } from "./pos-content";
 
-export default function CashierPage() {
-  const handleLogout = async () => {
-    const res = await logOut();
-    if (res.success) {
-      toast.success(res.message);
-      redirect("/login");
-    }
-  };
+export default async function CashierPosPage() {
+  const [products, categories] = await Promise.all([
+    productRepository.getProducts(),
+    categoryRepository.getCategories(),
+  ]);
 
-  return (
-    <div>
-      <Button onClick={handleLogout}></Button>
-    </div>
-  );
+  return <PosContent products={products} categories={categories} />;
 }

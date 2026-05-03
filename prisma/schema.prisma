@@ -52,10 +52,32 @@ model Product {
 
   orderItems OrderItem[]
 
-  isActive  Boolean   @default(true)
-  createdAt DateTime  @default(now())
-  updatedAt DateTime  @updatedAt
-  deletedAt DateTime?
+  isActive       Boolean         @default(true)
+  createdAt      DateTime        @default(now())
+  updatedAt      DateTime        @updatedAt
+  deletedAt      DateTime?
+  modifierGroups ModifierGroup[]
+}
+
+model ModifierGroup {
+  id         String           @id @default(uuid())
+  name       String
+  isRequired Boolean          @default(true)
+  isMultiple Boolean          @default(true)
+  options    ModifierOption[]
+  product    Product[]
+  createdAt  DateTime         @default(now())
+  updatedAt  DateTime         @updatedAt
+  deletedAt  DateTime?
+}
+
+model ModifierOption {
+  id              String        @id @default(uuid())
+  name            String
+  additionalPrice Float
+  modifierGroup   ModifierGroup @relation(fields: [modifierGroupId], references: [id])
+  modifierGroupId String
+  deletedAt       DateTime?
 }
 
 model Order {
