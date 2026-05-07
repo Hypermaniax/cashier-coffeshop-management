@@ -10,17 +10,6 @@ import {
 } from "@/utils/validation/product";
 import { revalidatePath } from "next/cache";
 
-function parseModifierIds(formData: FormData): string[] {
-  try {
-    const raw = formData.get("modifierGroupIds");
-    if (!raw) return [];
-    const parsed = JSON.parse(raw as string);
-    return Array.isArray(parsed) ? parsed : [];
-  } catch {
-    return [];
-  }
-}
-
 export async function createProduct(formData: FormData) {
   const data = Object.fromEntries(formData.entries());
 
@@ -35,10 +24,7 @@ export async function createProduct(formData: FormData) {
     const { create, category } = await productService.createProduct(
       validate.data,
     );
-    const modifierGroupIds = parseModifierIds(formData);
-    if (modifierGroupIds.length > 0) {
-      await productRepository.setProductModifiers(create.id, modifierGroupIds);
-    }
+
     revalidatePath("/admin/product");
     return {
       success: true,
@@ -65,9 +51,6 @@ export async function updateProduct(id: string, formData: FormData) {
   }
   try {
     const { update } = await productService.updateProduct(id, validate.data);
-    // Always sync modifiers (even empty = remove all)
-    const modifierGroupIds = parseModifierIds(formData);
-    await productRepository.setProductModifiers(id, modifierGroupIds);
     revalidatePath("/admin/product");
 
     return {
@@ -109,7 +92,9 @@ export async function createCategory(name: string) {
     };
 
   try {
-    const create = await categoryService.createCategory(validate.data.name.toLowerCase());
+    const create = await categoryService.createCategory(
+      validate.data.name.toLowerCase(),
+    );
     revalidatePath("admin/product");
     return {
       success: true,

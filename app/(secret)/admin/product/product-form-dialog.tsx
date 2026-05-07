@@ -12,6 +12,7 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Checkbox } from "@/components/ui/checkbox";
 import {
   Select,
   SelectContent,
@@ -19,11 +20,10 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Badge } from "@/components/ui/badge";
 import { Plus, ChevronLeft, Loader2, Check, X } from "lucide-react";
 import { createProduct, updateProduct, createCategory } from "./actions";
 import { toast } from "sonner";
-import { Category, ModifierGroup, ProductFormDialogProps } from "@/types";
+import { Category, ProductFormDialogProps } from "@/types";
 import { cn } from "@/lib/utils";
 
 export function ProductFormDialog({
@@ -37,20 +37,19 @@ export function ProductFormDialog({
   const formRef = useRef<HTMLFormElement>(null);
 
   const [categoryId, setCategoryId] = useState(
-    product?.categoryId?.toString() ?? ""
+    product?.categoryId?.toString() ?? "",
   );
   const [categoryMode, setCategoryMode] = useState<"select" | "new">("select");
   const [newCategoryName, setNewCategoryName] = useState("");
   const [creatingCategory, startCreatingCategory] = useTransition();
   const [isPending, startTransition] = useTransition();
-  const [localCategories, setLocalCategories] = useState<Category[]>(categories);
+  const [localCategories, setLocalCategories] =
+    useState<Category[]>(categories);
 
-  // Modifier multi-select state
   const [selectedModifiers, setSelectedModifiers] = useState<string[]>(
-    product?.modifierGroups?.map((mg) => mg.id) ?? []
+    product?.modifierGroups?.map((mg) => mg.id) ?? [],
   );
 
-  // Reset when dialog opens/closes
   function handleClose() {
     setCategoryMode("select");
     setNewCategoryName("");
@@ -61,7 +60,7 @@ export function ProductFormDialog({
 
   function toggleModifier(id: string) {
     setSelectedModifiers((prev) =>
-      prev.includes(id) ? prev.filter((m) => m !== id) : [...prev, id]
+      prev.includes(id) ? prev.filter((m) => m !== id) : [...prev, id],
     );
   }
 
@@ -69,11 +68,12 @@ export function ProductFormDialog({
     if (!newCategoryName.trim()) return;
     startCreatingCategory(async () => {
       try {
-        const { message, success, data } = await createCategory(newCategoryName);
+        const { message, success, data } =
+          await createCategory(newCategoryName);
         if (success) {
           toast.success(message);
           setLocalCategories((prev) =>
-            prev.find((c) => c.id === data?.id) ? prev : [...prev, data!]
+            prev.find((c) => c.id === data?.id) ? prev : [...prev, data!],
           );
           setCategoryId(data?.id.toString() ?? "");
           setCategoryMode("select");
@@ -91,7 +91,6 @@ export function ProductFormDialog({
     e.preventDefault();
     const formData = new FormData(e.currentTarget);
     formData.set("categoryId", categoryId);
-    // Pass modifier IDs as JSON string — parsed in server action
     formData.set("modifierGroupIds", JSON.stringify(selectedModifiers));
 
     startTransition(async () => {
@@ -177,21 +176,26 @@ export function ProductFormDialog({
             <div className="flex items-center justify-between">
               <Label>Kategori</Label>
               {categoryMode === "select" ? (
-                <button
+                <Button
                   type="button"
+                  variant="link"
                   onClick={() => setCategoryMode("new")}
-                  className="flex items-center gap-1 text-xs text-amber-600 hover:text-amber-700 hover:underline"
+                  className="flex h-auto p-0 items-center gap-1 text-xs text-amber-600 hover:text-amber-700"
                 >
                   <Plus className="h-3 w-3" /> Kategori baru
-                </button>
+                </Button>
               ) : (
-                <button
+                <Button
                   type="button"
-                  onClick={() => { setCategoryMode("select"); setNewCategoryName(""); }}
-                  className="flex items-center gap-1 text-xs text-muted-foreground hover:underline"
+                  variant="link"
+                  onClick={() => {
+                    setCategoryMode("select");
+                    setNewCategoryName("");
+                  }}
+                  className="flex h-auto p-0 items-center gap-1 text-xs text-muted-foreground"
                 >
                   <ChevronLeft className="h-3 w-3" /> Pilih yang ada
-                </button>
+                </Button>
               )}
             </div>
 
@@ -215,7 +219,10 @@ export function ProductFormDialog({
                   onChange={(e) => setNewCategoryName(e.target.value)}
                   placeholder="Contoh: Cold Drinks"
                   onKeyDown={(e) => {
-                    if (e.key === "Enter") { e.preventDefault(); handleCreateCategory(); }
+                    if (e.key === "Enter") {
+                      e.preventDefault();
+                      handleCreateCategory();
+                    }
                   }}
                 />
                 <Button
@@ -225,50 +232,56 @@ export function ProductFormDialog({
                   onClick={handleCreateCategory}
                   className="shrink-0"
                 >
-                  {creatingCategory ? <Loader2 className="h-4 w-4 animate-spin" /> : "Tambah"}
+                  {creatingCategory ? (
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                  ) : (
+                    "Tambah"
+                  )}
                 </Button>
               </div>
             )}
           </div>
 
-          {/* Modifier Groups */}
           <div className="space-y-2 border-t pt-4">
             <div className="flex items-center justify-between">
               <Label>Modifier</Label>
               {selectedModifiers.length > 0 && (
-                <button
+                <Button
                   type="button"
+                  variant="link"
                   onClick={() => setSelectedModifiers([])}
-                  className="text-xs text-muted-foreground hover:text-red-500 flex items-center gap-1"
+                  className="h-auto p-0 text-xs text-muted-foreground hover:text-red-500 flex items-center gap-1"
                 >
                   <X className="h-3 w-3" /> Hapus semua
-                </button>
+                </Button>
               )}
             </div>
 
             {modifierGroups.length === 0 ? (
               <p className="rounded-lg border border-dashed py-4 text-center text-xs text-muted-foreground">
-                Belum ada modifier. Tambahkan di halaman Modifier terlebih dahulu.
+                Belum ada modifier. Tambahkan di halaman Modifier terlebih
+                dahulu.
               </p>
             ) : (
               <div className="flex flex-wrap gap-2">
                 {modifierGroups.map((mg) => {
                   const isSelected = selectedModifiers.includes(mg.id);
                   return (
-                    <button
+                    <Button
                       key={mg.id}
                       type="button"
+                      variant="outline"
                       onClick={() => toggleModifier(mg.id)}
                       className={cn(
-                        "flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-xs font-medium transition-all duration-200",
+                        "flex h-8 items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-medium transition-all duration-200",
                         isSelected
-                          ? "border-amber-400 bg-amber-50 text-amber-700 shadow-sm"
-                          : "border-gray-200 bg-background text-muted-foreground hover:border-amber-300 hover:text-amber-600"
+                          ? "border-amber-400 bg-amber-50 text-amber-700 shadow-sm hover:bg-amber-100 hover:text-amber-800"
+                          : "border-gray-200 bg-background text-muted-foreground hover:border-amber-300 hover:text-amber-600 hover:bg-background",
                       )}
                     >
                       {isSelected && <Check className="h-3 w-3" />}
                       {mg.name}
-                    </button>
+                    </Button>
                   );
                 })}
               </div>
@@ -282,25 +295,42 @@ export function ProductFormDialog({
           </div>
 
           {/* Image URL */}
-          <div className="space-y-1.5">
-            <Label htmlFor="prod-image">URL Gambar (opsional)</Label>
+          <div className="space-y-2">
+            <Label htmlFor="prod-image">Gambar Produk (Opsional)</Label>
+            
+            {/* Tampilkan gambar yang sudah ada jika ada */}
+            {isEdit && product?.image && typeof product.image === "string" && (
+              <div className="mb-2 flex flex-col items-center gap-3">
+                <img 
+                  src={product.image} 
+                  alt="Preview" 
+                  className="w-full object-cover rounded-md border"
+                />
+                <p className="text-xs text-muted-foreground">Gambar saat ini</p>
+              </div>
+            )}
+            
             <Input
               id="prod-image"
               name="image"
-              placeholder="https://..."
-              defaultValue={product?.image ?? ""}
               disabled={isPending}
+              type="file"
+              accept="image/png, image/jpeg, image/webp"
             />
+            {isEdit && (
+              <p className="text-[11px] text-muted-foreground">
+                *Biarkan kosong jika tidak ingin mengubah gambar.
+              </p>
+            )}
           </div>
 
           {/* Active Status */}
           <div className="flex items-center gap-2 pb-1">
-            <input
-              type="checkbox"
+            <Checkbox
               id="prod-isActive"
               name="isActive"
               defaultChecked={isEdit ? product.isActive : true}
-              className="h-4 w-4 rounded border-gray-300 text-amber-600 focus:ring-amber-500"
+              className="border-gray-300 data-[state=checked]:bg-amber-600 data-[state=checked]:border-amber-600 focus-visible:ring-amber-500"
             />
             <Label htmlFor="prod-isActive" className="cursor-pointer">
               Produk Aktif

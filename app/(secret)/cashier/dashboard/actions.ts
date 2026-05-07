@@ -8,7 +8,18 @@ import { revalidatePath } from "next/cache";
 export async function submitOrderAction(data: {
   totalAmount: number;
   paymentMethod: string;
-  items: { productId: string; quantity: number; subtotal: number }[];
+  items: {
+    productId: string;
+    quantity: number;
+    subtotal: number;
+    modifiers?: {
+      groupId: string;
+      groupName: string;
+      optionId: string;
+      optionName: string;
+      additionalPrice: number;
+    }[];
+  }[];
 }) {
   try {
     const cookieStore = await cookies();

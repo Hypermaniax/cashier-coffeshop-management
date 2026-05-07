@@ -19,7 +19,7 @@ export const productRepository = {
         name: data.name,
         price: data.price,
         stock: data.stock,
-        image: data.image,
+        image: data.image as string | null,
         isActive: data.isActive,
       },
     });
@@ -34,7 +34,7 @@ export const productRepository = {
         price: data.price,
         stock: data.stock,
         categoryId: data.categoryId,
-        image: data.image,
+        image: data.image as string | null | undefined,
         isActive: data.isActive,
       },
     });
@@ -56,7 +56,14 @@ export const productRepository = {
       },
       include: {
         category: true,
-        modifierGroups: true,
+        modifierGroups: {
+          where: { deletedAt: null },
+          include: {
+            options: {
+              where: { deletedAt: null },
+            },
+          },
+        },
       },
       orderBy: { createdAt: "desc" },
     });
@@ -68,7 +75,14 @@ export const productRepository = {
       },
       include: {
         category: true,
-        modifierGroups: true,
+        modifierGroups: {
+          where: { deletedAt: null },
+          include: {
+            options: {
+              where: { deletedAt: null },
+            },
+          },
+        },
       },
     });
   },

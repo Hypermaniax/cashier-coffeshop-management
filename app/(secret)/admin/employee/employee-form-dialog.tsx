@@ -12,6 +12,7 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Checkbox } from "@/components/ui/checkbox";
 import {
   Select,
   SelectContent,
@@ -147,12 +148,11 @@ export default function EmployeeFormDialog({
 
           {/* Active Status */}
           <div className="flex items-center gap-2 pb-1">
-            <input
-              type="checkbox"
+            <Checkbox
               id="emp-isActive"
               name="isActive"
               defaultChecked={isEdit ? employee.isActive : true}
-              className="h-4 w-4 rounded border-gray-300 text-amber-600 focus:ring-amber-500"
+              className="border-gray-300 data-[state=checked]:bg-amber-600 data-[state=checked]:border-amber-600 focus-visible:ring-amber-500"
             />
             <Label htmlFor="emp-isActive" className="cursor-pointer">
               Karyawan Aktif

@@ -4,7 +4,7 @@ export const modifierOptionSchema = z.object({
   id: z.string().optional(),
   name: z.string().min(1, "Nama opsi tidak boleh kosong"),
   additionalPrice: z.coerce
-    .number({ invalid_type_error: "Harga tambahan harus berupa angka" })
+    .number({ message: "Harga tambahan harus berupa angka" })
     .min(0, "Harga tambahan tidak boleh negatif")
     .transform((val) => Number(val)),
 });

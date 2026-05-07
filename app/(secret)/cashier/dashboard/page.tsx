@@ -1,18 +1,12 @@
-import { orderRepository } from "@/repositories/order";
-import { DashboardContent } from "./dashboard-content";
+"use server";
+import { productRepository } from "@/repositories/product";
+import { categoryRepository } from "@/repositories/category";
+import { PosContent } from "./pos-content";
 
-export default async function CashierDashboardPage() {
-  const [stats, weeklyRevenue, topProducts] = await Promise.all([
-    orderRepository.getTodayStats(),
-    orderRepository.getWeeklyRevenue(),
-    orderRepository.getTopProducts(),
+export default async function CashierPosPage() {
+  const [products, categories] = await Promise.all([
+    productRepository.getProducts(),
+    categoryRepository.getCategories(),
   ]);
-
-  return (
-    <DashboardContent
-      stats={stats}
-      weeklyRevenue={weeklyRevenue}
-      topProducts={topProducts}
-    />
-  );
+  return <PosContent products={products} categories={categories} />;
 }

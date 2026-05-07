@@ -1,12 +1,5 @@
-import { productRepository } from "@/repositories/product";
-import { categoryRepository } from "@/repositories/category";
-import { PosContent } from "./pos-content";
+import { redirect } from "next/navigation";
 
-export default async function CashierPosPage() {
-  const [products, categories] = await Promise.all([
-    productRepository.getProducts(),
-    categoryRepository.getCategories(),
-  ]);
-
-  return <PosContent products={products} categories={categories} />;
+export default function CashierPage() {
+  return redirect("/cashier/dashboard");
 }

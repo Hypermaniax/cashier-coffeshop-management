@@ -32,8 +32,7 @@ import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
 
 const navItems = [
-  { title: "Dashboard", icon: LayoutDashboard, href: "/cashier/dashboard" },
-  { title: "Kasir (POS)", icon: ShoppingCart, href: "/cashier" },
+  { title: "Dashboard (POS)", icon: LayoutDashboard, href: "/cashier/dashboard" },
   { title: "Riwayat Order", icon: ClipboardList, href: "/cashier/history" },
 ];
 
@@ -183,7 +182,7 @@ export default function CashierLayout({
                 backgroundSize: "48px 48px",
               }}
             />
-            <div className="relative z-10 ">{children}</div>
+            <div className="relative z-10 p-6">{children}</div>
           </div>
         </SidebarInset>
       </SidebarProvider>

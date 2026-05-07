@@ -33,18 +33,20 @@ export interface CreateProductDto {
   name: string;
   price: number;
   stock: number;
-  image?: string | null;
+  image?: File | string | null;
   categoryId: number;
   isActive: boolean;
+  modifierGroupIds?: string[];
 }
 
 export interface UpdateProductDto {
   name: string;
   price: number;
   stock: number;
-  image?: string | null;
+  image?: File | string | null;
   categoryId: number;
   isActive: boolean;
+  modifierGroupIds?: string[];
 }
 export interface ProductFormDialogProps {
   open: boolean;
@@ -60,19 +62,6 @@ export interface EmployeeFormDialogProps {
   roles: Role[];
   employee?: User;
 }
-
-type Product = {
-  id: string;
-  name: string;
-  price: number;
-  stock: number;
-  image: string | null;
-  categoryId: number;
-  isActive: boolean;
-  modifierGroups?: { id: string; name: string }[];
-};
-
-export type Category = { id: number; name: string };
 
 export interface UserTableProps {
   users: User[];
@@ -127,4 +116,73 @@ export interface ModifierFormDialogProps {
   open: boolean;
   onClose: () => void;
   modifierGroup?: ModifierGroup;
+}
+
+export interface Category {
+  id: number;
+  name: string;
+}
+
+export interface Product {
+  id: string;
+  name: string;
+  price: number;
+  stock: number;
+  image: string | null;
+  categoryId: number;
+  isActive: boolean;
+  modifierGroups?: ModifierGroup[];
+}
+
+export interface CartItemModifier {
+  groupId: string;
+  groupName: string;
+  optionId: string;
+  optionName: string;
+  additionalPrice: number;
+}
+
+export interface CartItem {
+  id: string; // Unique ID for cart item (since same product can have different modifiers)
+  product: Product;
+  quantity: number;
+  selectedModifiers: CartItemModifier[];
+  subtotal: number;
+}
+
+export interface DashboardChartProps {
+  weeklyRevenue: { date: string; revenue: number }[];
+  maxRevenue: number;
+}
+
+export interface DashboardTopProductsProps {
+  products: { name: string; totalSales: number }[];
+}
+
+export interface DashboardStatusCardProps {
+  title: string;
+  value: string;
+  icon: LucideIcon;
+  color: string;
+  bg: string;
+  border: string;
+  sub: string;
+}
+
+export interface DashboardProps {
+  stats: {
+    todayRevenue: number;
+    totalOrders: number;
+    productsSold: number;
+    todayOrders: {
+      id: string;
+      items: any[];
+      createdAt: Date;
+      totalAmount: number;
+      status: string;
+    }[];
+  };
+  weeklyRevenue: { date: string; revenue: number }[];
+  topProducts: { name: string; sold: number }[];
+  allProducts: { isActive: boolean }[];
 }

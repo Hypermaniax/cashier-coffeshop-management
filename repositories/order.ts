@@ -14,7 +14,6 @@ export const orderRepository = {
       orderBy: { createdAt: "desc" },
     });
   },
-
   async getTodayStats() {
     const startOfDay = new Date();
     startOfDay.setHours(0, 0, 0, 0);
@@ -126,7 +125,18 @@ export const orderRepository = {
     cashierId: string;
     totalAmount: number;
     paymentMethod: string;
-    items: { productId: string; quantity: number; subtotal: number }[];
+    items: {
+      productId: string;
+      quantity: number;
+      subtotal: number;
+      modifiers?: {
+        groupId: string;
+        groupName: string;
+        optionId: string;
+        optionName: string;
+        additionalPrice: number;
+      }[];
+    }[];
   }) {
     return await prisma.order.create({
       data: {
@@ -139,6 +149,15 @@ export const orderRepository = {
             productId: item.productId,
             quantity: item.quantity,
             subtotal: item.subtotal,
+            modifiers: item.modifiers && item.modifiers.length > 0 ? {
+              create: item.modifiers.map((mod) => ({
+                modifierGroupId: mod.groupId,
+                groupName: mod.groupName,
+                modifierOptionId: mod.optionId,
+                optionName: mod.optionName,
+                additionalPrice: mod.additionalPrice,
+              })),
+            } : undefined,
           })),
         },
       },

@@ -1,7 +1,23 @@
-export default function DashboardPage() {
+import { orderRepository } from "@/repositories/order";
+import { productRepository } from "@/repositories/product";
+import Dashboard from "./dashboard";
+
+export default async function DashboardPage() {
+  const [stats, weeklyRevenue, topProducts, allProducts] = await Promise.all([
+    orderRepository.getTodayStats(),
+    orderRepository.getWeeklyRevenue(),
+    orderRepository.getTopProducts(),
+    productRepository.getProducts(),
+  ]);
+
   return (
-    <main className="flex min-h-screen flex-col items-center justify-between p-24">
-      <h1>Admin Dashboard</h1>
-    </main>
+    <>
+      <Dashboard 
+        stats={stats}
+        weeklyRevenue={weeklyRevenue}
+        topProducts={topProducts}
+        allProducts={allProducts}
+      />
+    </>
   );
 }

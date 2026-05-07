@@ -99,9 +99,25 @@ model OrderItem {
   quantity Int
   subtotal Float
 
-  order   Order  @relation(fields: [orderId], references: [id])
+  order   Order  @relation(fields: [orderId], references: [id], onDelete: Cascade)
   orderId String
 
   product   Product @relation(fields: [productId], references: [id])
   productId String
+
+  modifiers OrderItemModifier[]
+}
+
+model OrderItemModifier {
+  id          String    @id @default(uuid())
+  orderItem   OrderItem @relation(fields: [orderItemId], references: [id], onDelete: Cascade)
+  orderItemId String
+
+  modifierGroupId String
+  groupName       String
+
+  modifierOptionId String
+  optionName       String
+
+  additionalPrice Float
 }

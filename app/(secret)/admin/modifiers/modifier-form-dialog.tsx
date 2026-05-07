@@ -140,14 +140,15 @@ export function ModifierFormDialog({
           {/* Toggles */}
           <div className="flex flex-col sm:flex-row gap-3">
             {/* isRequired toggle */}
-            <button
+            <Button
               type="button"
+              variant="outline"
               onClick={() => setIsRequired((prev) => !prev)}
               disabled={isPending}
-              className={`flex-1 flex items-center justify-center gap-2 rounded-xl border-2 px-4 py-2.5 text-sm font-medium transition-all ${
+              className={`flex-1 h-auto flex items-center justify-center gap-2 rounded-xl border-2 px-4 py-2.5 text-sm font-medium transition-all ${
                 isRequired
-                  ? "border-red-400 bg-red-50 text-red-700"
-                  : "border-gray-200 bg-gray-50 text-gray-500 hover:border-gray-300"
+                  ? "border-red-400 bg-red-50 text-red-700 hover:bg-red-100"
+                  : "border-gray-200 bg-gray-50 text-gray-500 hover:border-gray-300 hover:bg-gray-100"
               }`}
             >
               <span
@@ -156,17 +157,18 @@ export function ModifierFormDialog({
                 }`}
               />
               {isRequired ? "Wajib Dipilih" : "Opsional"}
-            </button>
+            </Button>
 
             {/* isMultiple toggle */}
-            <button
+            <Button
               type="button"
+              variant="outline"
               onClick={() => setIsMultiple((prev) => !prev)}
               disabled={isPending}
-              className={`flex-1 flex items-center justify-center gap-2 rounded-xl border-2 px-4 py-2.5 text-sm font-medium transition-all ${
+              className={`flex-1 h-auto flex items-center justify-center gap-2 rounded-xl border-2 px-4 py-2.5 text-sm font-medium transition-all ${
                 isMultiple
-                  ? "border-blue-400 bg-blue-50 text-blue-700"
-                  : "border-gray-200 bg-gray-50 text-gray-500 hover:border-gray-300"
+                  ? "border-blue-400 bg-blue-50 text-blue-700 hover:bg-blue-100"
+                  : "border-gray-200 bg-gray-50 text-gray-500 hover:border-gray-300 hover:bg-gray-100"
               }`}
             >
               <span
@@ -175,7 +177,7 @@ export function ModifierFormDialog({
                 }`}
               />
               {isMultiple ? "Bisa Pilih Banyak" : "Pilih Satu Saja"}
-            </button>
+            </Button>
           </div>
 
           {/* Options list */}

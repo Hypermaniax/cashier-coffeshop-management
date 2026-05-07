@@ -28,7 +28,7 @@ type Product = {
   isActive: boolean;
   categoryId: number;
   category: Category;
-  modifierGroups?: { id: string; name: string }[];
+  modifierGroups?: { id: string; name: string; isRequired: boolean; isMultiple: boolean; options: { id: string; name: string; additionalPrice: number; modifierGroupId: string }[] }[];
 };
 
 interface ProductTableProps {
@@ -203,7 +203,7 @@ export function ProductTable({ products, categories, modifierGroups }: ProductTa
         onClose={handleFormClose}
         categories={categories}
         modifierGroups={modifierGroups}
-        product={editProduct}
+        product={editProduct as any}
       />
       <DeleteProductDialog
         open={!!deleteTarget}

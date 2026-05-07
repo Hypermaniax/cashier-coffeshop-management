@@ -11,7 +11,19 @@ import {
   TrendingUp,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
-
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Calendar } from "@/components/ui/calendar";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { format } from "date-fns";
+import { id as idLocale } from "date-fns/locale";
 interface OrderItem {
   product: { name: string; price: number };
   quantity: number;
@@ -71,7 +83,7 @@ function getPaymentBadge(method: string) {
 
 export function HistoryContent({ orders }: { orders: Order[] }) {
   const [search, setSearch] = useState("");
-  const [filterDate, setFilterDate] = useState("");
+  const [filterDate, setFilterDate] = useState<Date | undefined>(undefined);
   const [filterPayment, setFilterPayment] = useState("ALL");
   const [expandedOrder, setExpandedOrder] = useState<string | null>(null);
 
@@ -86,7 +98,7 @@ export function HistoryContent({ orders }: { orders: Order[] }) {
           i.product.name.toLowerCase().includes(search.toLowerCase())
         ) ||
         order.cashier.name.toLowerCase().includes(search.toLowerCase());
-      const matchDate = filterDate === "" || orderDate === filterDate;
+      const matchDate = !filterDate || orderDate === format(filterDate, "yyyy-MM-dd");
       const matchPayment =
         filterPayment === "ALL" || order.paymentMethod === filterPayment;
       return matchSearch && matchDate && matchPayment;
@@ -144,54 +156,67 @@ export function HistoryContent({ orders }: { orders: Order[] }) {
       <div className="flex flex-wrap gap-3">
         {/* Search */}
         <div className="relative flex-1 min-w-[200px]">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-          <input
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground z-10" />
+          <Input
             id="history-search"
             type="text"
             placeholder="Cari produk atau kasir..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className="w-full rounded-xl border bg-background pl-9 pr-4 py-2 text-sm outline-none focus:ring-2 focus:ring-amber-500/30 focus:border-amber-400 transition-all"
+            className="w-full rounded-xl pl-9 bg-background focus-visible:ring-amber-500/30 focus-visible:border-amber-400"
           />
         </div>
 
         {/* Date filter */}
-        <div className="relative">
-          <CalendarDays className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground pointer-events-none" />
-          <input
-            id="history-date-filter"
-            type="date"
-            value={filterDate}
-            onChange={(e) => setFilterDate(e.target.value)}
-            className="rounded-xl border bg-background pl-9 pr-4 py-2 text-sm outline-none focus:ring-2 focus:ring-amber-500/30 focus:border-amber-400 transition-all"
-          />
-        </div>
+        <Popover>
+          <PopoverTrigger asChild>
+            <Button
+              variant="outline"
+              className={cn(
+                "w-[200px] justify-start text-left font-normal rounded-xl bg-background border-border hover:bg-background/80",
+                !filterDate && "text-muted-foreground"
+              )}
+            >
+              <CalendarDays className="mr-2 h-4 w-4" />
+              {filterDate ? format(filterDate, "PPP", { locale: idLocale }) : <span>Pilih tanggal</span>}
+            </Button>
+          </PopoverTrigger>
+          <PopoverContent className="w-auto p-0" align="start">
+            <Calendar
+              mode="single"
+              selected={filterDate}
+              onSelect={setFilterDate}
+              initialFocus
+            />
+          </PopoverContent>
+        </Popover>
 
         {/* Payment method filter */}
-        <select
-          id="history-payment-filter"
-          value={filterPayment}
-          onChange={(e) => setFilterPayment(e.target.value)}
-          className="rounded-xl border bg-background px-4 py-2 text-sm outline-none focus:ring-2 focus:ring-amber-500/30 focus:border-amber-400 transition-all"
-        >
-          <option value="ALL">Semua Metode</option>
-          <option value="CASH">Tunai</option>
-          <option value="QRIS">QRIS</option>
-          <option value="CARD">Kartu</option>
-        </select>
+        <Select value={filterPayment} onValueChange={setFilterPayment}>
+          <SelectTrigger className="w-[180px] rounded-xl bg-background focus:ring-amber-500/30 focus:border-amber-400">
+            <SelectValue placeholder="Metode Pembayaran" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="ALL">Semua Metode</SelectItem>
+            <SelectItem value="CASH">Tunai</SelectItem>
+            <SelectItem value="QRIS">QRIS</SelectItem>
+            <SelectItem value="CARD">Kartu</SelectItem>
+          </SelectContent>
+        </Select>
 
         {/* Clear filters */}
         {(search || filterDate || filterPayment !== "ALL") && (
-          <button
+          <Button
+            variant="outline"
             onClick={() => {
               setSearch("");
-              setFilterDate("");
+              setFilterDate(undefined);
               setFilterPayment("ALL");
             }}
-            className="rounded-xl border border-red-200 bg-red-50 px-4 py-2 text-sm font-medium text-red-600 hover:bg-red-100 transition-colors"
+            className="rounded-xl border-red-200 bg-red-50 text-red-600 hover:bg-red-100 hover:text-red-700"
           >
             Reset Filter
-          </button>
+          </Button>
         )}
       </div>
 
