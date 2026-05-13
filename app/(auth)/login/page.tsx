@@ -17,18 +17,23 @@ import { Loader2, Lock, LogIn, User } from "lucide-react";
 import { useActionState, useEffect } from "react";
 import { toast } from "sonner";
 import { login } from "./action";
-import { redirect } from "next/navigation";
+import { useRouter } from "next/navigation";
 
 export default function AdminPage() {
   const [state, formAction, isPending] = useActionState(login, null);
+  const router = useRouter();
 
   useEffect(() => {
     if (!state) return;
     if (state?.success) {
       toast.success(state.message);
-      redirect("/cashier");
+      if (state.role === "ADMIN") {
+        router.push("/admin/dashboard");
+      } else {
+        router.push("/cashier/dashboard");
+      }
     } else toast.error(state.message);
-  }, [state]);
+  }, [state, router]);
 
   return (
     <Card className="p-5 min-w-md">
@@ -49,7 +54,7 @@ export default function AdminPage() {
               placeholder="Username"
             />
           </InputGroup>
-          <InputGroup className="px-4 py-5w">
+          <InputGroup className="px-4 py-5">
             <InputGroupText>
               <Lock className="w-6 h-6" />
             </InputGroupText>

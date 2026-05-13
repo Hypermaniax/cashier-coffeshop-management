@@ -9,8 +9,10 @@ import {
   updateProductSchema,
 } from "@/utils/validation/product";
 import { revalidatePath } from "next/cache";
+import { requireAuth } from "@/lib/auth";
 
 export async function createProduct(formData: FormData) {
+  await requireAuth("ADMIN");
   const data = Object.fromEntries(formData.entries());
 
   const validate = createProductSchema.safeParse(data);
@@ -40,6 +42,7 @@ export async function createProduct(formData: FormData) {
 }
 
 export async function updateProduct(id: string, formData: FormData) {
+  await requireAuth("ADMIN");
   const data = Object.fromEntries(formData.entries());
   const validate = updateProductSchema.safeParse(data);
   if (!validate.success) {
@@ -67,6 +70,7 @@ export async function updateProduct(id: string, formData: FormData) {
 }
 
 export async function deleteProduct(id: string) {
+  await requireAuth("ADMIN");
   try {
     const { update } = await productService.softDeleteProduct(id);
     revalidatePath("/admin/product");
@@ -83,6 +87,7 @@ export async function deleteProduct(id: string) {
 }
 
 export async function createCategory(name: string) {
+  await requireAuth("ADMIN");
   const validate = createCategorySchema.safeParse({ name });
   if (!validate.success)
     return {

@@ -67,7 +67,6 @@ export const orderRepository = {
       totalOrders,
     };
   },
-
   async getWeeklyRevenue() {
     const result: { date: string; revenue: number }[] = [];
     const today = new Date();
@@ -96,7 +95,6 @@ export const orderRepository = {
 
     return result;
   },
-
   async getTopProducts() {
     const items = await prisma.orderItem.groupBy({
       by: ["productId"],
@@ -115,12 +113,11 @@ export const orderRepository = {
           name: product?.name ?? "Unknown",
           sold: item._sum.quantity ?? 0,
         };
-      })
+      }),
     );
 
     return withNames;
   },
-
   async createOrder(data: {
     cashierId: string;
     totalAmount: number;
@@ -149,21 +146,41 @@ export const orderRepository = {
             productId: item.productId,
             quantity: item.quantity,
             subtotal: item.subtotal,
-            modifiers: item.modifiers && item.modifiers.length > 0 ? {
-              create: item.modifiers.map((mod) => ({
-                modifierGroupId: mod.groupId,
-                groupName: mod.groupName,
-                modifierOptionId: mod.optionId,
-                optionName: mod.optionName,
-                additionalPrice: mod.additionalPrice,
-              })),
-            } : undefined,
+            modifiers:
+              item.modifiers && item.modifiers.length > 0
+                ? {
+                    create: item.modifiers.map((mod) => ({
+                      modifierGroupId: mod.groupId,
+                      groupName: mod.groupName,
+                      modifierOptionId: mod.optionId,
+                      optionName: mod.optionName,
+                      additionalPrice: mod.additionalPrice,
+                    })),
+                  }
+                : undefined,
           })),
         },
       },
       include: {
         items: true,
       },
+    });
+  },
+  async getOrderByuserId(cashierId: string) {
+    return await prisma.order.findMany({
+      where: {
+        cashierId: cashierId,
+        status: "COMPLETED",
+      },
+      include: {
+        items: {
+          include: {
+            product: { select: { id: true, name: true, price: true } },
+          },
+        },
+        cashier: { select: { id: true, name: true } },
+      },
+      orderBy: { createdAt: "desc" },
     });
   },
 };

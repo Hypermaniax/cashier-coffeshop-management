@@ -1,26 +1,13 @@
+'use server'
 import { orderRepository } from "@/repositories/order";
 import { PeriodFilter } from "./period-filter";
 import { Suspense } from "react";
+import { PaymentFilter } from "./payment-filter";
+import { formater } from "@/utils/formatter";
 
 type Period = "daily" | "weekly" | "monthly" | "all";
+type PaymentMethod = "CASH" | "QRIS" | "DEBIT" | "all";
 
-function formatRupiah(amount: number) {
-  return new Intl.NumberFormat("id-ID", {
-    style: "currency",
-    currency: "IDR",
-    minimumFractionDigits: 0,
-  }).format(amount);
-}
-
-function formatDate(date: Date) {
-  return new Date(date).toLocaleString("id-ID", {
-    day: "2-digit",
-    month: "short",
-    year: "numeric",
-    hour: "2-digit",
-    minute: "2-digit",
-  });
-}
 
 function getDateRange(period: Period): { start: Date; end: Date } | null {
   if (period === "all") return null;
@@ -54,28 +41,41 @@ function periodLabel(period: Period) {
 export default async function TransactionPage({
   searchParams,
 }: {
-  searchParams: Promise<{ period?: string }>;
+  searchParams: Promise<{ period?: string; "payment-method"?: string }>;
 }) {
-  const { period: rawPeriod } = await searchParams;
+
+  const { period: rawPeriod, "payment-method": rawPayment } = await searchParams;
   const period: Period =
     rawPeriod === "daily" || rawPeriod === "weekly" || rawPeriod === "monthly"
       ? rawPeriod
       : "all";
 
+  const paymentMethod: PaymentMethod =
+    rawPayment === "CASH" || rawPayment === "QRIS" || rawPayment === "DEBIT"
+      ? rawPayment
+      : "all";
+
   const allOrders = await orderRepository.getOrders();
 
   const range = getDateRange(period);
-  const orders = range
+  const filteredByPeriod = range
     ? allOrders.filter((o) => {
         const d = new Date(o.createdAt);
         return d >= range.start && d <= range.end;
       })
     : allOrders;
 
+  const orders =
+    paymentMethod === "all"
+      ? filteredByPeriod
+      : filteredByPeriod.filter(
+          (o) => o.paymentMethod?.toUpperCase() === paymentMethod,
+        );
+
   const totalRevenue = orders.reduce((s, o) => s + o.totalAmount, 0);
   const totalItems = orders.reduce(
     (s, o) => s + o.items.reduce((si, i) => si + i.quantity, 0),
-    0
+    0,
   );
 
   return (
@@ -85,12 +85,24 @@ export default async function TransactionPage({
         <div>
           <h1 className="text-2xl font-bold tracking-tight">Transaksi</h1>
           <p className="text-sm text-muted-foreground mt-0.5">
-            {periodLabel(period)} &middot; {orders.length} transaksi
+            {periodLabel(period)}
+            {paymentMethod !== "all" && (
+              <>
+                {" "}&middot;{" "}
+                <span className="inline-flex items-center rounded-full bg-amber-100 px-2 py-0.5 text-[11px] font-medium text-amber-700 ring-1 ring-inset ring-amber-200">
+                  {paymentMethod}
+                </span>
+              </>
+            )}
+            {" "}&middot; {orders.length} transaksi
           </p>
         </div>
-        <Suspense>
-          <PeriodFilter />
-        </Suspense>
+        <div className="flex flex-col gap-3">
+          <Suspense>
+            <PeriodFilter />
+            <PaymentFilter />
+          </Suspense>
+        </div>
       </div>
 
       {/* Summary Cards */}
@@ -98,7 +110,7 @@ export default async function TransactionPage({
         {[
           { label: "Total Transaksi", value: orders.length.toString() },
           { label: "Total Item Terjual", value: totalItems.toString() },
-          { label: "Total Pendapatan", value: formatRupiah(totalRevenue) },
+          { label: "Total Pendapatan", value: formater.rupiahFormater(totalRevenue) },
         ].map((card) => (
           <div
             key={card.label}
@@ -148,7 +160,7 @@ export default async function TransactionPage({
                       <span className="font-medium">{item.quantity}x</span>{" "}
                       {item.product.name}
                       <span className="text-muted-foreground ml-1 text-xs">
-                        ({formatRupiah(item.subtotal)})
+                        ({formater.rupiahFormater(item.subtotal)})
                       </span>
                     </p>
                   ))}
@@ -162,11 +174,11 @@ export default async function TransactionPage({
                 </div>
 
                 <p className="text-sm text-muted-foreground">
-                  {formatDate(order.createdAt)}
+                  {formater.dateFormatter(order.createdAt)}
                 </p>
 
                 <p className="text-sm font-semibold text-right">
-                  {formatRupiah(order.totalAmount)}
+                  {formater.rupiahFormater(order.totalAmount)}
                 </p>
               </div>
             ))}

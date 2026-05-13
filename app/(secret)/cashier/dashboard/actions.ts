@@ -48,7 +48,6 @@ export async function submitOrderAction(data: {
 
     return { success: true, message: "Transaksi berhasil diproses!" };
   } catch (error: any) {
-    console.error("Order submission error:", error);
     return { success: false, message: error.message || "Gagal memproses transaksi." };
   }
 }

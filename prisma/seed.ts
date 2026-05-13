@@ -25,7 +25,7 @@ async function main() {
     where: { username: "admin" },
     update: {},
     create: {
-      name: "Admin User",
+      name: "Admin User",  
       username: "admin",
       password: adminPassword,
       roleId: adminRole.id,

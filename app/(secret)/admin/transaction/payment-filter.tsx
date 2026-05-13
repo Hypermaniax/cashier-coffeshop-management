@@ -3,40 +3,43 @@
 import { useRouter, useSearchParams } from "next/navigation";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
-type Period = "daily" | "weekly" | "monthly" | "all";
+type PaymentMethod = "CASH" | "QRIS" | "DEBIT" | "all";
 
-const options: { label: string; value: Period }[] = [
-  { label: "Hari Ini", value: "daily" },
-  { label: "Minggu Ini", value: "weekly" },
-  { label: "Bulan Ini", value: "monthly" },
+const options: { label: string; value: PaymentMethod }[] = [
+  { label: "Tunai", value: "CASH" },
+  { label: "QRIS", value: "QRIS" },
+  { label: "Debit", value: "DEBIT" },
   { label: "Semua", value: "all" },
 ];
 
-export function PeriodFilter() {
+export function PaymentFilter() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const current = (searchParams.get("period") ?? "all") as Period;
+  const current = (searchParams.get("payment-method") ??
+    "all") as PaymentMethod;
 
-  function handleClick(value: Period) {
+  function handleClick(value: PaymentMethod) {
     const params = new URLSearchParams(searchParams.toString());
+
     if (value === "all") {
-      params.delete("period");
+      params.delete("payment-method");
     } else {
-      params.set("period", value);
+      params.set("payment-method", value);
     }
     router.push(`?${params.toString()}`);
   }
 
   return (
-    <Tabs value={current} onValueChange={(val) => handleClick(val as Period)}>
+    <Tabs value={current}>
       <TabsList className="bg-muted/40 p-1 border h-auto">
-        {options.map((opt) => (
+        {options.map((option) => (
           <TabsTrigger
-            key={opt.value}
-            value={opt.value}
+            key={option.value}
+            value={option.value}
+            onClick={() => handleClick(option.value)}
             className="px-3 py-1.5 text-sm font-medium transition-all data-[state=active]:bg-white data-[state=active]:shadow-sm data-[state=active]:text-amber-700 data-[state=active]:border data-[state=active]:border-amber-200 text-muted-foreground hover:text-foreground rounded-md"
           >
-            {opt.label}
+            {option.label}
           </TabsTrigger>
         ))}
       </TabsList>

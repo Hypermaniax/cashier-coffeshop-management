@@ -29,7 +29,11 @@ export const login = async (_: any, formData: FormData) => {
       maxAge: 60 * 60 * 24,
     });
     revalidatePath("/login");
-    return { success: true, message: `Welcome Back ${user.name}` };
+    return { 
+      success: true, 
+      message: `Welcome Back ${user.name}`,
+      role: user.role.name 
+    };
   } catch (error: any) {
     return { success: false, message: error.message, inputs: validate.data };
   }
