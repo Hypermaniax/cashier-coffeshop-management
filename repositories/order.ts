@@ -183,4 +183,44 @@ export const orderRepository = {
       orderBy: { createdAt: "desc" },
     });
   },
+  async getOrdersPagination({
+    paymentMethod,
+    dateStart,
+    dateEnd,
+    page = 1,
+    pageSize = 10,
+  }: {
+    paymentMethod?: string;
+    dateStart?: Date;
+    dateEnd?: Date;
+    page?: number;
+    pageSize?: number;
+  }) {
+    const where = {
+      ...(paymentMethod ? { paymentMethod } : {}),
+      ...(dateStart && dateEnd
+        ? { createdAt: { gte: dateStart, lte: dateEnd } }
+        : {}),
+    };
+
+    const [data, total] = await Promise.all([
+      prisma.order.findMany({
+        where,
+        include: {
+          cashier: { select: { id: true, name: true } },
+          items: {
+            include: {
+              product: { select: { id: true, name: true, price: true } },
+            },
+          },
+        },
+        orderBy: { createdAt: "desc" },
+        skip: (page - 1) * pageSize,
+        take: pageSize,
+      }),
+      prisma.order.count({ where }),
+    ]);
+
+    return { data, total, page, pageSize, totalPages: Math.ceil(total / pageSize) };
+  },
 };

@@ -192,7 +192,7 @@ export default function AdminLayout({
                 backgroundSize: "48px 48px",
               }}
             />
-            <div className="relative z-10 p-4 md:p-6">{children}</div>
+            <div className="relative p-6">{children}</div>
           </div>
         </SidebarInset>
       </SidebarProvider>

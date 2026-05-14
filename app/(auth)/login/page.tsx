@@ -36,7 +36,7 @@ export default function AdminPage() {
   }, [state, router]);
 
   return (
-    <Card className="p-5 min-w-md">
+    <Card className="w-full max-w-md p-5 mx-auto">
       <CardHeader>
         <CardDescription className="text-center text-xs">Login</CardDescription>
       </CardHeader>

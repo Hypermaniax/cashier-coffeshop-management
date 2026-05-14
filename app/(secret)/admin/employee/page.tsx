@@ -10,8 +10,8 @@ export default async function EmployeePage() {
     roleRepository.getAll(),
   ]);
   return (
-    <div className="p-6">
+    <>
       <EmployeTable users={users} roles={roles} />
-    </div>
+    </>
   );
 }

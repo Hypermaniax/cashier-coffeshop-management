@@ -115,7 +115,7 @@ export default function EmployeTable({ users, roles }: UserTableProps) {
                     </Badge>
                   </TableCell>
                   <TableCell>
-                    <div className="flex items-center justify-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                    <div className="flex items-center justify-center gap-1 ">
                       <Button
                         id={`btn-edit-employee-${user.id}`}
                         size="icon"

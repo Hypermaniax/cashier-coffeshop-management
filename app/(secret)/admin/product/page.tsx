@@ -12,12 +12,12 @@ export default async function ProductPage() {
     modifierRepository.getModifierGroups(),
   ]);
   return (
-    <div className="p-6">
+    <>
       <ProductTable
         products={products}
         categories={categories}
         modifierGroups={modifierGroups}
       />
-    </div>
+    </>
   );
 }

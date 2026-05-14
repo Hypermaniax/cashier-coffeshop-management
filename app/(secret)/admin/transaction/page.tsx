@@ -1,13 +1,16 @@
-'use server'
+"use server";
+
 import { orderRepository } from "@/repositories/order";
 import { PeriodFilter } from "./period-filter";
 import { Suspense } from "react";
 import { PaymentFilter } from "./payment-filter";
 import { formater } from "@/utils/formatter";
+import { Pagination } from "./pagination";
 
 type Period = "daily" | "weekly" | "monthly" | "all";
 type PaymentMethod = "CASH" | "QRIS" | "DEBIT" | "all";
 
+const PAGE_SIZE = 10;
 
 function getDateRange(period: Period): { start: Date; end: Date } | null {
   if (period === "all") return null;
@@ -41,10 +44,18 @@ function periodLabel(period: Period) {
 export default async function TransactionPage({
   searchParams,
 }: {
-  searchParams: Promise<{ period?: string; "payment-method"?: string }>;
+  searchParams: Promise<{
+    period?: string;
+    "payment-method"?: string;
+    page?: string;
+  }>;
 }) {
+  const {
+    period: rawPeriod,
+    "payment-method": rawPayment,
+    page: rawPage,
+  } = await searchParams;
 
-  const { period: rawPeriod, "payment-method": rawPayment } = await searchParams;
   const period: Period =
     rawPeriod === "daily" || rawPeriod === "weekly" || rawPeriod === "monthly"
       ? rawPeriod
@@ -55,22 +66,18 @@ export default async function TransactionPage({
       ? rawPayment
       : "all";
 
-  const allOrders = await orderRepository.getOrders();
+  const page = Math.max(1, parseInt(rawPage ?? "1", 10) || 1);
 
   const range = getDateRange(period);
-  const filteredByPeriod = range
-    ? allOrders.filter((o) => {
-        const d = new Date(o.createdAt);
-        return d >= range.start && d <= range.end;
-      })
-    : allOrders;
 
-  const orders =
-    paymentMethod === "all"
-      ? filteredByPeriod
-      : filteredByPeriod.filter(
-          (o) => o.paymentMethod?.toUpperCase() === paymentMethod,
-        );
+  const { data: orders, total, totalPages } =
+    await orderRepository.getOrdersPagination({
+      paymentMethod: paymentMethod === "all" ? undefined : paymentMethod,
+      dateStart: range?.start,
+      dateEnd: range?.end,
+      page,
+      pageSize: PAGE_SIZE,
+    });
 
   const totalRevenue = orders.reduce((s, o) => s + o.totalAmount, 0);
   const totalItems = orders.reduce(
@@ -88,13 +95,14 @@ export default async function TransactionPage({
             {periodLabel(period)}
             {paymentMethod !== "all" && (
               <>
-                {" "}&middot;{" "}
+                {" "}
+                &middot;{" "}
                 <span className="inline-flex items-center rounded-full bg-amber-100 px-2 py-0.5 text-[11px] font-medium text-amber-700 ring-1 ring-inset ring-amber-200">
                   {paymentMethod}
                 </span>
               </>
-            )}
-            {" "}&middot; {orders.length} transaksi
+            )}{" "}
+            &middot; {total} transaksi
           </p>
         </div>
         <div className="flex flex-col gap-3">
@@ -108,9 +116,12 @@ export default async function TransactionPage({
       {/* Summary Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
         {[
-          { label: "Total Transaksi", value: orders.length.toString() },
-          { label: "Total Item Terjual", value: totalItems.toString() },
-          { label: "Total Pendapatan", value: formater.rupiahFormater(totalRevenue) },
+          { label: "Total Transaksi", value: total.toString() },
+          { label: "Total Item Terjual (Halaman Ini)", value: totalItems.toString() },
+          {
+            label: "Pendapatan (Halaman Ini)",
+            value: formater.rupiahFormater(totalRevenue),
+          },
         ].map((card) => (
           <div
             key={card.label}
@@ -182,6 +193,16 @@ export default async function TransactionPage({
                 </p>
               </div>
             ))}
+          </div>
+
+          {/* Pagination footer */}
+          <div className="px-5 py-4 border-t bg-muted/20 flex items-center justify-between gap-4">
+            <p className="text-xs text-muted-foreground">
+              Halaman {page} dari {totalPages} &middot; {total} transaksi
+            </p>
+            <Suspense>
+              <Pagination currentPage={page} totalPages={totalPages} />
+            </Suspense>
           </div>
         </div>
       )}

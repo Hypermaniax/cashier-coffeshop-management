@@ -11,7 +11,7 @@ export default function AuthLayout({
           A simple coffee shop management system
         </p>
       </div>
-      <div className="items-center gap-5 flex-col flex">{children}</div>
+      <div className="items-center gap-5 flex-col flex w-full px-4">{children}</div>
     </div>
   );
 }
