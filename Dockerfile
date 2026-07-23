@@ -1,70 +1,29 @@
-# Multi-stage Dockerfile for Next.js with Prisma and pnpm
-FROM node:20-alpine AS base
+# syntax=docker/dockerfile:1
 
-# 1. Install dependencies only when needed
-FROM base AS deps
-RUN apk add --no-cache libc6-compat
+# ---- Stage 1: build ----
+FROM node:20-alpine AS builder
 WORKDIR /app
 
-# Install pnpm
-RUN npm install -g pnpm
+# hanya copy file yg dibutuhkan utk install + build
+COPY package.json ./
+RUN npm install
 
-# Copy files necessary for dependency installation
-COPY package.json pnpm-lock.yaml* pnpm-workspace.yaml* ./
-COPY prisma ./prisma/
-
-# Install dependencies including devDependencies for build
-RUN pnpm install --frozen-lockfile
-
-# 2. Rebuild the source code only when needed
-FROM base AS builder
-WORKDIR /app
-RUN npm install -g pnpm
-
-COPY --from=deps /app/node_modules ./node_modules
 COPY . .
+RUN npm run build
 
-# Generate Prisma Client
-RUN pnpm prisma generate
-
-# Disable telemetry during build
-ENV NEXT_TELEMETRY_DISABLED=1
-
-# Build the Next.js application
-RUN pnpm build
-
-# 3. Production runner
-FROM base AS runner
+# ---- Stage 2: runtime ----
+FROM node:20-alpine AS runner
 WORKDIR /app
 
 ENV NODE_ENV=production
-ENV NEXT_TELEMETRY_DISABLED=1
+ENV PORT=3000
 
-# Create non-root user
-RUN addgroup --system --gid 1001 nodejs
-RUN adduser --system --uid 1001 nextjs
-
-# Copy public directory for static assets
+# standalone sudah include node runtime subset + app
+COPY --from=builder /app/.next/standalone ./
+COPY --from=builder /app/.next/static ./.next/static
 COPY --from=builder /app/public ./public
 
-# Set permissions for Next.js prerender cache
-RUN mkdir .next
-RUN chown nextjs:nodejs .next
+EXPOSE 3000
 
-# Leverage output standalone tracing
-COPY --from=builder --chown=nextjs:nodejs /app/.next/standalone ./
-COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
-
-# Copy Prisma schema and generated files for runtime use
-COPY --from=builder --chown=nextjs:nodejs /app/prisma ./prisma
-COPY --from=builder --chown=nextjs:nodejs /app/lib/generated/prisma ./lib/generated/prisma
-
-USER nextjs
-
-EXPOSE 3001
-
-ENV PORT=3001
-ENV HOSTNAME="0.0.0.0"
-
-# Command to start the standalone Next.js server
+# upload folder di-mount sebagai volume di runtime (lihat docker-compose)
 CMD ["node", "server.js"]

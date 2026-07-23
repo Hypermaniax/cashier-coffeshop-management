@@ -26,6 +26,7 @@ import {
   Receipt,
   Users,
   SlidersHorizontal,
+  QrCode,
 } from "lucide-react";
 import Link from "next/link";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -41,6 +42,7 @@ const navItems = [
   { title: "Modifier", icon: SlidersHorizontal, href: "/admin/modifiers" },
   { title: "Transaction", icon: Receipt, href: "/admin/transaction" },
   { title: "Employee", icon: Users, href: "/admin/employee" },
+  { title: "QRIS", icon: QrCode, href: "/admin/qris" },
 ];
 
 function LiveClock() {

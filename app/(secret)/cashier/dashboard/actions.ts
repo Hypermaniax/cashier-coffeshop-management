@@ -1,9 +1,8 @@
 "use server";
 
-import { cookies } from "next/headers";
-import { validateToken } from "@/utils/jwt";
 import { orderRepository } from "@/repositories/order";
 import { revalidatePath } from "next/cache";
+import { requireAuth } from "@/lib/auth";
 
 export async function submitOrderAction(data: {
   totalAmount: number;
@@ -22,18 +21,7 @@ export async function submitOrderAction(data: {
   }[];
 }) {
   try {
-    const cookieStore = await cookies();
-    const token = cookieStore.get("token")?.value;
-
-    if (!token) {
-      return { success: false, message: "Sesi kasir tidak valid. Silakan login kembali." };
-    }
-
-    const authPayload = validateToken(token);
-    
-    if (!authPayload || !authPayload.id) {
-        return { success: false, message: "Kasir tidak ditemukan." };
-    }
+    const authPayload = await requireAuth("CASHIER");
 
     await orderRepository.createOrder({
       cashierId: authPayload.id,

@@ -5,6 +5,7 @@ import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { cn, formatRupiah } from "@/lib/utils";
 import { CartItem } from "@/types";
+import { QrisModal } from "./qris-modal";
 
 const PAYMENT_METHODS = [
   {
@@ -255,6 +256,14 @@ export function PosCart({
           )}
         </Button>
       </div>
+
+      <QrisModal
+        open={paymentMethod === "QRIS" && cart.length > 0}
+        onClose={() => setPaymentMethod("CASH")}
+        totalAmount={totalAmount}
+        isPending={isPending}
+        onConfirm={handleCheckout}
+      />
     </div>
   );
 }

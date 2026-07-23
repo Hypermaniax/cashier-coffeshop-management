@@ -19,11 +19,12 @@ model Users {
   password  String
   role      Role      @relation(fields: [roleId], references: [id])
   roleId    Int
-  createdAt DateTime  @default(now())
+  createdAt DateTime @default(now())
   isActive  Boolean   @default(true)
   updatedAt DateTime  @updatedAt
   deletedAt DateTime?
   orders    Order[]
+  qrisConfigs QrisConfig[]
 }
 
 model Role {
@@ -120,4 +121,13 @@ model OrderItemModifier {
   optionName       String
 
   additionalPrice Float
+}
+
+model QrisConfig {
+  id          String   @id
+  hash        String
+  filePath    String
+  uploadedBy  Users     @relation(fields: [uploadedById], references: [id])
+  uploadedById String
+  createdAt   DateTime @default(now())
 }

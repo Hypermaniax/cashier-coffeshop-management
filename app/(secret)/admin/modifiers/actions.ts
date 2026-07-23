@@ -4,8 +4,10 @@ import { modifierRepository } from "@/repositories/modifier";
 import { CreateModifierGroupDto, UpdateModifierGroupDto } from "@/types";
 import { revalidatePath } from "next/cache";
 import { createModifierGroupSchema, updateModifierGroupSchema } from "@/utils/validation/modifier";
+import { requireAuth } from "@/lib/auth";
 
 export async function createModifierGroupAction(data: CreateModifierGroupDto) {
+  await requireAuth("ADMIN");
   try {
     const validate = createModifierGroupSchema.safeParse(data);
     if (!validate.success) {
@@ -25,6 +27,7 @@ export async function createModifierGroupAction(data: CreateModifierGroupDto) {
 }
 
 export async function updateModifierGroupAction(id: string, data: UpdateModifierGroupDto) {
+  await requireAuth("ADMIN");
   try {
     const validate = updateModifierGroupSchema.safeParse(data);
     if (!validate.success) {
@@ -44,6 +47,7 @@ export async function updateModifierGroupAction(id: string, data: UpdateModifier
 }
 
 export async function deleteModifierGroupAction(id: string) {
+  await requireAuth("ADMIN");
   try {
     await modifierRepository.deleteModifierGroup(id);
     revalidatePath("/admin/modifiers");

@@ -1,6 +1,7 @@
 "use server";
 
 import { authService } from "@/service/auth";
+import { requireAuth } from "@/lib/auth";
 import {
   createEmployeeSchema,
   updateEmployeeSchema,
@@ -8,6 +9,7 @@ import {
 import { revalidatePath } from "next/cache";
 
 export async function createEmployee(formData: FormData) {
+  await requireAuth("ADMIN");
   const data = Object.fromEntries(formData.entries());
   const validated = createEmployeeSchema.safeParse(data);
   if (!validated.success) {
@@ -27,6 +29,7 @@ export async function createEmployee(formData: FormData) {
 }
 
 export async function updateEmployee(id: string, formData: FormData) {
+  await requireAuth("ADMIN");
   const data = Object.fromEntries(formData.entries());
   const validated = updateEmployeeSchema.safeParse(data);
   if (!validated.success) {
@@ -45,6 +48,7 @@ export async function updateEmployee(id: string, formData: FormData) {
 }
 
 export async function deleteEmployee(id: string) {
+  await requireAuth("ADMIN");
   try {
     const { update } = await authService.sofDeleteUser(id);
     revalidatePath("/admin/employee");
